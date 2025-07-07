@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Explorer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"/>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="font-sans bg-gray-100">
+    <!-- Navigation Bar -->
+    <nav id="navbar" class="bg-transparent text-gray-800 shadow-md w-full z-20 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="text-2xl font-extrabold text-blue-600" id="navbar-logo">Travel Directory</div>
+                <div class="hidden md:flex space-x-6" id="navbar-links">
+                    <a href="#" class="flex items-center hover:text-blue-600"><i class="fas fa-home mr-2"></i>Home</a>
+                    <a href="#" class="flex items-center hover:text-blue-600"><i class="fas fa-map-marker-alt mr-2"></i>Places</a>
+                    <a href="#" class="flex items-center hover:text-blue-600"><i class="fas fa-images mr-2"></i>Gallery</a>
+                    <a href="#" class="flex items-center hover:text-blue-600"><i class="fas fa-envelope mr-2"></i>Contact</a>
+                    <button class="border-blue-600 border hover:bg-blue-600 hover:text-white text-blue-600 font-bold py-2 px-6 rounded">Book Tour Now</button>
+                </div>
+                <div class="md:hidden">
+                    <button id="menu-btn" class="text-gray-800 focus:outline-none">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="mobile-menu" class="hidden md:hidden flex flex-col space-y-4 pb-4">
+                <a href="#" class="flex items-center text-gray-800 hover:text-blue-600"><i class="fas fa-home mr-2"></i>Home</a>
+                <a href="#" class="flex items-center text-gray-800 hover:text-blue-600"><i class="fas fa-map-marker-alt mr-2"></i>Places</a>
+                <a href="#" class="flex items-center text-gray-800 hover:text-blue-600"><i class="fas fa-images mr-2"></i>Gallery</a>
+                <a href="#" class="flex items-center text-gray-800 hover:text-blue-600"><i class="fas fa-envelope mr-2"></i>Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Overlay -->
+    <section class="relative h-screen bg-cover bg-center text-white flex items-center justify-center" style="background-image: url('./hero.jpg')">
+        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+        <div class="relative text-center z-10">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4">Explore the World</h1>
+            <p class="text-lg mb-6">Find your next adventure with us</p>
+            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded">Explore Now</button>
+        </div>
+    </section>
+
+    <!-- Video Section -->
+    <section class="p-6 my-20">
+        <h2 class="text-3xl text-center font-bold mb-4">Promotional Video</h2>
+        <video controls autoplay muted class="w-full max-w-3xl mx-auto" width="640" height="360">
+            <source src="video.mp4" type="video/mp4">
+            <track src="subtitles.vtt" kind="subtitles" srclang="en" label="English">
+            Your browser does not support the video tag.
+        </video>
+    </section>
+
+    <!-- Audio Section -->
+    <section class="p-6 my-20 flex flex-col justify-center items-center">
+        <h2 class="text-3xl text-center font-bold mb-4">Relaxing Music</h2>
+        <audio controls class="w-full max-w-md">
+            <source src="relaxing.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+    </section>
+
+    <!-- API Fetched Section -->
+    <section class="p-6 my-20">
+        <h2 class="text-3xl text-center font-bold mb-4">Top Destinations</h2>
+        <div id="destinations" class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"></div>
+    </section>
+
+    <!-- Footer with SVG -->
+    <footer class="bg-gray-800 text-white p-6 mt-10">
+        <div class="flex items-center justify-center">
+            <svg class="w-8 h-8 mr-2 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 0C6.686 0 4 2.686 4 6c0 3.866 6 13 6 13s6-9.134 6-13c0-3.314-2.686-6-6-6zm0 8a2 2 0 110-4 2 2 0 010 4z"/>
+            </svg>
+            <span>&copy; 2025 Travel Directory. All rights reserved.</span>
+        </div>
+    </footer>
+
+    <script>
+    // Hamburger menu toggle
+    document.getElementById('menu-btn').addEventListener('click', () => {
+        const menu = document.getElementById('mobile-menu');
+        menu.classList.toggle('hidden');
+    });
+
+    // Fetch tourist destinations using Geoapify Places API
+    const GEOAPIFY_API_KEY = '188d3f03314c4f3c992c72b8aec38aee';
+    const UNSPLASH_ACCESS_KEY = 'mJBYeelixUlvUTTA8RPgiFWHigse-Me-TIjSWeYhvQM';
+    // const lat = 28.6139; // New Delhi
+    // const lon = 77.2090;
+    // const lat = 12.9629; // Bangalore
+    // const lon = 77.5775;
+    // const lat = 18.9582; // Mumbai
+    // const lon = 72.8321;
+    // const lat = 25.7565; // Deoli
+    // const lon = 75.3844;
+    const lat = 18.5246; // Pune
+    const lon = 73.8786;
+
+    const radius = 5000;
+
+    let limit = 12;
+
+    function fetchImage(placeName) {
+        return fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(placeName)}&client_id=${UNSPLASH_ACCESS_KEY}`)
+        .then(res => res.json())
+        .then(data => data.results[0]?.urls?.small || null)
+        .catch(() => null);
+    }
+
+    fetch(`https://api.geoapify.com/v2/places?categories=tourism.sights&filter=circle:${lon},${lat},${radius}&limit=${limit}&apiKey=${GEOAPIFY_API_KEY}`)
+        .then(resp => resp.json())
+        .then(data => {
+        const container = document.getElementById('destinations');
+        data.features.forEach(async place => {
+            const name = place.properties.name || 'Unnamed Place';
+            const address = place.properties.address_line2 || '';
+            const website = place.properties.website || '';
+            const imageUrl = await fetchImage(name);
+
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-lg shadow-md overflow-hidden';
+
+            card.innerHTML = `
+            ${imageUrl ? `<img src="${imageUrl}" alt="${name}" class="w-full h-40 object-cover">` : ''}
+            <div class="p-4">
+                <h3 class="font-bold text-xl mb-2">${name}</h3>
+                <p class="text-sm mb-2">${address}</p>
+                ${website ? `<a href="${website}" class="text-blue-600 hover:underline" target="_blank">Visit Website</a>` : ''}
+            </div>
+            `;
+
+            container.appendChild(card);
+        });
+        });
+
+    </script>
+</body>
+</html>
